@@ -19,6 +19,7 @@
             android:id="@+id/autoCompletionWord"
             android:completionThreshold="2"
             android:hint="Start typing your word.."
-            />
+            android:singleLine="true" 
+        />
     </LinearLayout>
 </RelativeLayout>

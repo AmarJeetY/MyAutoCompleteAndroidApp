@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Android.App;
+using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.V7.App;
@@ -17,13 +19,20 @@ namespace AutoComplete
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
-            
             SetContentView(Resource.Layout.activity_main);
-            
             var adapter =  new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleSpinnerItem, GetAllWords());
             var autoComplete = FindViewById<AutoCompleteTextView>(Resource.Id.autoCompletionWord);
-            
             autoComplete.Adapter = adapter;
+            Button button = FindViewById<Button>(Resource.Id.browseFile);
+            button.Click += ButtonOnClick;
+        }
+
+        private void ButtonOnClick(object sender, EventArgs eventArgs)
+        {
+            Intent = new Intent();
+            Intent.SetType("file/*");
+            Intent.SetAction(Intent.ActionGetContent);
+            StartActivityForResult(Intent.CreateChooser(Intent, "Select file"), 1000);
         }
 
         private List<string> GetAllWords()
@@ -34,12 +43,10 @@ namespace AutoComplete
             var file = File.CreateText(csvFilePath);
             file.Write("hello, helium, height, high, horse, flower, florence");
             file.Close();
-            
             var allWords = File.ReadAllLines(csvFilePath)
                 .SelectMany(line => line.Split(','))
                 .SelectMany(line => line.Split(' '))
                 .ToList();
-
             return allWords.Where(word => rgx.IsMatch(word)).ToList();
         }
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)

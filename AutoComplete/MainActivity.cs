@@ -5,10 +5,14 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Android.App;
 using Android.Content;
+using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.V7.App;
 using Android.Widget;
+using Xamarin.Essentials;
+using AlertDialog = Android.App.AlertDialog;
+using Environment = Android.OS.Environment;
 
 namespace AutoComplete
 {
@@ -18,12 +22,12 @@ namespace AutoComplete
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
-            Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
-            var adapter =  new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleSpinnerItem, GetAllWords());
+            var adapter =  new ArrayAdapter<string>(this, Android.Resource.Layout.SimpleSpinnerItem, GetAllWordFromCsvFile());
             var autoComplete = FindViewById<AutoCompleteTextView>(Resource.Id.autoCompletionWord);
             autoComplete.Adapter = adapter;
-            Button button = FindViewById<Button>(Resource.Id.browseFile);
+            var button = FindViewById<Button>(Resource.Id.browseFile);
             button.Click += ButtonOnClick;
         }
 
@@ -32,26 +36,58 @@ namespace AutoComplete
             Intent = new Intent();
             Intent.SetType("file/*");
             Intent.SetAction(Intent.ActionGetContent);
-            StartActivityForResult(Intent.CreateChooser(Intent, "Select file"), 1000);
+            StartActivityForResult(Intent.CreateChooser(Intent, "Select file"),1000);
         }
 
-        private List<string> GetAllWords()
+        public void SaveSelectedFile(string filePath)
+        {
+            var csvData  = File.ReadAllBytes(filePath);
+            var localFilename = "AutoComplete" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".csv";
+            var documentsPath = Environment.GetExternalStoragePublicDirectory(Environment.DirectoryDownloads).AbsolutePath;
+
+            var isDirectoryWritable = Environment.ExternalStorageState == Environment.MediaMounted;
+            if (isDirectoryWritable)
+            {
+                var newFilepath = Path.Combine(documentsPath, localFilename);
+                File.WriteAllBytes(newFilepath, csvData);
+            }
+            else
+            {
+                var alert = new AlertDialog.Builder(this);
+                alert.SetTitle("File Write Error");
+                alert.SetPositiveButton("OK", (senderAlert, args) => {});
+                RunOnUiThread(() => {
+                    alert.Show();
+                });
+            }
+        }
+        
+        private List<string> GetAllWordFromCsvFile()
         {
             var rgx = new Regex("^[a-zA-Z]+$");
-            var appDirectory = Application.Context.GetExternalFilesDir(null).AbsolutePath;
-            var csvFilePath = Path.Combine(appDirectory, "DataFile.csv");
-            var file = File.CreateText(csvFilePath);
-            file.Write("hello, helium, height, high, horse, flower, florence");
-            file.Close();
-            var allWords = File.ReadAllLines(csvFilePath)
+            var assets = Assets;
+            var csvDestinationFilePath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
+            var filePath = Path.Combine(csvDestinationFilePath, "AutoComplete.csv");
+            using (var stream1 = new FileStream(filePath, FileMode.Create))
+            {
+                stream1.Dispose();
+            }
+
+            using (var sr = new StreamReader(assets.Open("AutoComplete.csv")))
+            {
+                var content = sr.ReadToEnd();
+                File.WriteAllText(filePath, content);
+            }
+
+            var allWords = File.ReadAllLines(filePath)
                 .SelectMany(line => line.Split(','))
                 .SelectMany(line => line.Split(' '))
                 .ToList();
             return allWords.Where(word => rgx.IsMatch(word)).ToList();
         }
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Permission[] grantResults)
         {
-            Xamarin.Essentials.Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            Platform.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }

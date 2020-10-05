@@ -3,3 +3,7 @@
 ################################################################################
 
 /AutoComplete/bin/Debug
+/AutoComplete/obj
+/AutoComplete/bin/Release
+/.vs
+/AutoComplete.Unit.Tests/obj

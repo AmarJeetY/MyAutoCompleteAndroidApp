@@ -19,6 +19,14 @@
             android:id="@+id/autoCompletionWord"
             android:completionThreshold="2"
             android:hint="Start typing your word.."
-            />
+            android:singleLine="true" 
+        />
+        <Button
+            android:text="Browse AutoComplete file.."
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0"
+            android:layout_gravity="center"
+            android:id="@+id/browseFile" />
     </LinearLayout>
 </RelativeLayout>

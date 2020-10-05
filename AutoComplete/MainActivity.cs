@@ -66,11 +66,10 @@ namespace AutoComplete
             var assets = Assets;
             var csvDestinationFilePath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal);
             var filePath = Path.Combine(csvDestinationFilePath, "AutoComplete.csv");
-            using (var stream1 = new FileStream(filePath, FileMode.Create))
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
             {
-                stream1.Dispose();
+                fileStream.Dispose();
             }
-
             using (var sr = new StreamReader(assets.Open("AutoComplete.csv")))
             {
                 var content = sr.ReadToEnd();

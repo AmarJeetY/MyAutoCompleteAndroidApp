@@ -30,12 +30,12 @@ namespace AutoComplete
             var button = FindViewById<Button>(Resource.Id.browseFile);
             button.Click += ButtonOnClick;
         }
-
         private void ButtonOnClick(object sender, EventArgs eventArgs)
         {
             Intent = new Intent();
             Intent.SetType("file/*");
             Intent.SetAction(Intent.ActionGetContent);
+            Intent.AddCategory(Intent.CategoryOpenable);
             StartActivityForResult(Intent.CreateChooser(Intent, "Select file"),1000);
         }
 
@@ -44,7 +44,6 @@ namespace AutoComplete
             var csvData  = File.ReadAllBytes(filePath);
             var localFilename = "AutoComplete" + DateTime.Now.ToString("yyyyMMddHHmmssfff") + ".csv";
             var documentsPath = Environment.GetExternalStoragePublicDirectory(Environment.DirectoryDownloads).AbsolutePath;
-
             var isDirectoryWritable = Environment.ExternalStorageState == Environment.MediaMounted;
             if (isDirectoryWritable)
             {
@@ -61,7 +60,6 @@ namespace AutoComplete
                 });
             }
         }
-        
         private List<string> GetAllWordFromCsvFile()
         {
             var rgx = new Regex("^[a-zA-Z]+$");

@@ -1,4 +1,4 @@
-rem Build Project
+rem Build Project. Replace paths with your local paths
 "C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\msbuild.exe" /p:Configuration=Release /t:SignAndroidPackage "C:\Users\Amarjeet.Yelwande\source\repos\MyAutoCompleteAndroidApp\AutoComplete\MyCompany.AutoComplete.Xamarin.csproj"
 
 rem If build is successful goto release directory and show contents
